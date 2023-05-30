@@ -5,7 +5,7 @@
       <div class="page-header">
           <h1>{{ titulo }}</h1>
       </div>
-      <form action="/criar" method="post">
+      <form action="{{url_for('criar')}}" method="post">
         <fieldset>
           <div class="form-group">
             <label for="nome">Nome</label>
