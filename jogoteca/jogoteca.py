@@ -10,7 +10,8 @@ app = Flask(__name__)
 # funcao para a rota
 def ola():
     # renderizando página html da pasta template com o render_template
-    return render_template('lista.html', titulo= 'Jogos') # passando variável para o lista.html
+    lista = ['Tetris', 'Skyrim', 'Crash']
+    return render_template('lista.html', titulo= 'Jogos',  jogos=lista) # passando variável para o lista.html
 
 # rodando aplicação
 app.run()
