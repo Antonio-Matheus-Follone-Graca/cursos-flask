@@ -1,5 +1,5 @@
 # importando flask
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session,flash
 
  
  # criando classe
@@ -17,6 +17,7 @@ jogo3= Jogo('Mortal Kombat','Luta','Ps2')
 lista = [jogo1,jogo2,jogo3]
 
 app = Flask(__name__)
+app.secret_key= 'alura'
 
 # criando uma rota 
 # ao  acessar /inicio na url a função retorna o seguinte código
@@ -59,10 +60,23 @@ def login():
 @app.route('/autenticar', methods=['POST', ])
 def autenticar():
     if 'alohomora' == request.form['senha']:
+        # iniciando sessão
+        session['usuario_logado'] = request.form['usuario']
+        # mandando mensagem 
+        flash(f'{session["usuario_logado"]} logado com sucesso!')
         return redirect('/')
     else:
+        flash('Usuário não logado')
         return redirect('/login')
     
 
+# rota para deslogar
+@app.route('/logout')
+def logout():
+    # deixando o session vazio o usuário é deslogado
+    session['usuario_logado'] = None
+    flash('Logout efetuado com sucesso!')
+    # redirecionando 
+    return redirect('/')
 app.run(debug=True)
         
