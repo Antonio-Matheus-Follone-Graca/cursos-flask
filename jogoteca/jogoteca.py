@@ -34,10 +34,9 @@ def novo():
 
 
 
-# rota para cadastro
+# rota que faz o cadastro e permitindo método post, por padrão o método é get
 @app.route('/criar', methods=['POST',])
 def criar():
-    
     # request pega as informações de um formulário 
     nome = request.form['nome']
     categoria = request.form['categoria']
@@ -49,6 +48,21 @@ def criar():
     # redirecionando para a rota index
     return redirect('/')
     
-    
+# rota para página de login
+@app.route('/login')
+def login():
+        return render_template('login.html')     
 # rodando aplicação e ativando debug para a apliacação ficar se atualizando toda hora    
+
+# rota que faz o logar 
+
+@app.route('/autenticar', methods=['POST', ])
+def autenticar():
+    if 'alohomora' == request.form['senha']:
+        return redirect('/')
+    else:
+        return redirect('/login')
+    
+
 app.run(debug=True)
+        
