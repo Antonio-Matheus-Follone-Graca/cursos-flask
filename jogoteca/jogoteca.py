@@ -1,40 +1,43 @@
 # importando flask
 from flask import Flask, render_template, request, redirect, session,flash, url_for
-
- 
- # criando classe
-class Jogo:
-    def __init__(self,nome,categoria, console):
-        self.nome = nome
-        self.categoria = categoria
-        self.console = console
-
-
-#
-jogo1= Jogo('Tetris','Puzzle','Atati')
-jogo2= Jogo('God of war','Hack n slash','Ps2')
-jogo3= Jogo('Mortal Kombat','Luta','Ps2')
-lista = [jogo1,jogo2,jogo3]
-
-class Usuario:
-    def __init__(self, nome, nickname, senha):
-        self.nome = nome
-        self.nickname = nickname
-        self.senha = senha
-
-usuario1 = Usuario("Bruno Divino", "BD", "alohomora")
-usuario2 = Usuario("Camila Ferreira", "Mila", "paozinho")
-usuario3 = Usuario("Guilherme Louro", "Cake", "Python_eh_vida")
-
-# dicionário
-usuarios = {
-    usuario1.nickname : usuario1,
-    usuario2.nickname : usuario2,
-    usuario3.nickname : usuario3
-}
-
+# importando sql alchemy para mexer no banco de dados
+from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key= 'alura'
+
+# variavel para conexão com banco de dados, parametro a aplicação que está rodando
+app.config['SQLALCHEMY_DATABASE_URI'] = \
+    '{SGBD}://{usuario}:{senha}@{servidor}/{database}'.format(
+        SGBD = 'mysql+mysqlconnector',
+        usuario = 'root',
+        senha = 'root',
+        servidor = 'localhost',
+        database = 'jogoteca'   
+    )
+    
+db=SQLAlchemy(app)
+    
+
+
+# preparando tabelas para o sqlalchemy
+class Jogos(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nome = db.Column(db.String(50), nullable=False)
+    categoria = db.Column(db.String(40), nullable=False)
+    console = db.Column(db.String(20), nullable=False)
+    
+    def __repr__(self):
+        return '<Name %r>' % self.name
+
+class Usuarios(db.Model):
+    nickname = db.Column(db.String(8), primary_key=True)
+    nome = db.Column(db.String(20), nullable=False)
+    senha = db.Column(db.String(100), nullable=False)
+    
+    def __repr__(self):
+        return '<Name %r>' % self.name
+    
+    
 
 # criando uma rota 
 # ao  acessar /inicio na url a função retorna o seguinte código
@@ -42,6 +45,8 @@ app.secret_key= 'alura'
 @app.route('/')
 # funcao para a rota
 def index():
+    # fazendo select da tabela de jogos
+    lista = Jogos.query.order_by(Jogos.id)
     # renderizando página html da pasta template com o render_template
     return render_template('lista.html', titulo= 'Jogos',  jogos=lista) # passando variável para o lista.html
 
@@ -65,12 +70,19 @@ def criar():
     nome = request.form['nome']
     categoria = request.form['categoria']
     console = request.form['console']
-    # passando para objeto
-    jogo= Jogo(nome,categoria,console)
-    # passando para a lista de array
-    lista.append(jogo)
-    # redirecionando para a rota index
-    # usando url for para procurar a rota. Nesse caso atráves da função
+    # select da tabela Jogos
+    jogo = Jogos.query.filter_by(nome = nome).first()
+    
+    if jogo:
+        flash('Jogo já existente')
+        return redirect(url_for('index'))
+    
+    # cadastrando jogo novo
+    novo_jogo = Jogos(nome = nome, categoria = categoria, console = console)
+    # insert 
+    db.session.add(novo_jogo)
+    db.session.commit()
+    
     return redirect(url_for('index'))
     
 # rota para página de login
@@ -85,9 +97,11 @@ def login():
 
 @app.route('/autenticar', methods=['POST', ])
 def autenticar():
+    # select de usuarios pelo nick
+    usuario = Usuarios.query.filter_by(nickname = request.form['usuario']).first()
     # se o nick  digitado pelo usuário existe 
-    if request.form['usuario'] in usuarios:
-        usuario = usuarios[request.form['usuario']]
+    if usuario:
+        # acessando campo senha 
         if request.form['senha'] == usuario.senha:
             # salvando nickname na session para logar o usuário
             session['usuario_logado'] = usuario.nickname
