@@ -1,3 +1,4 @@
+import os
 # chave que a biblioteca flask-login pede, pode ser string
 SECRET_KEY= 'alura'
 
@@ -10,3 +11,7 @@ SQLALCHEMY_DATABASE_URI = \
         servidor = 'localhost',
         database = 'jogoteca'   
     )
+    
+ # variável com caminho do diretório  de upload de imagens
+ 
+UPLOAD_PATH = os.path.dirname(os.path.abspath(__file__))  + '/uploads'

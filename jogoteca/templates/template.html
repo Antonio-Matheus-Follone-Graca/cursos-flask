@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Jogoteca </title>
-    <!-- em vez de colocar o ../static/bootstrap.css da forma abaixo  procura na pasta e o arquivo da pasta,
+    <!-- em vez de colocar o ../static/bootstrap.css, a forma abaixo  procura na pasta e o arquivo da pasta,
     pois se houver várias pastas ou arquivos não precisarei ficar procurando o endereço completo. -->
     <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.css' )}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='app.css' )}}">
   </head>
     <body>
       <div class="container">
@@ -25,6 +26,8 @@
 
         {% endblock %}
       </div>
-        
+    
+    <script src="{{url_for('static', filename='jquery.js')}}"></script>
+    <script src="{{url_for('static', filename='app.js')}}"></script>
     </body>
 </html>

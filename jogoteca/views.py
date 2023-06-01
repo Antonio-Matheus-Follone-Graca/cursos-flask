@@ -1,7 +1,11 @@
-from flask import Flask, render_template, request, redirect, session,flash, url_for
+from flask import  render_template, request, redirect, session,flash, url_for, send_from_directory
 # importando aplicação do projeto e banco do jogoteca.py
 from jogoteca import app, db
 from models import Jogos, Usuarios # models 
+
+# importando função de recuperar imagem que está no arquivo helpers.py
+from helpers import recupera_imagem, deleta_arquivo
+import  time
 # arquivo aonde ficam as rotas
 # criando uma  index 
 @app.route('/')
@@ -26,17 +30,16 @@ def novo():
 # rota para editar com o parametro id
 @app.route('/editar/<int:id>')
 def editar(id):
-   
     # se não houver usuário logado na sessão. Senão existir session["usuario_logado"]
     # se usuario_logado for igual a None
     if 'usuario_logado' not in session or session["usuario_logado"] == None :
         # passando a url da página que o usuário tentou acessar
         return redirect(url_for('login',proxima = url_for('editar')))
-    
     # select de acordo com o id
     jogo = Jogos.query.filter_by(id= id).first()
-    
-    return render_template('editar.html', titulo = 'Editando jogo', jogo = jogo)
+    # recuperando capa do jogo
+    capa_jogo = recupera_imagem(id)
+    return render_template('editar.html', titulo = 'Editando jogo', jogo = jogo,capa_jogo= capa_jogo )
 
 # rota de atualizar 
 @app.route('/atualizar', methods=['POST',])
@@ -50,6 +53,14 @@ def atualizar():
     db.session.add(jogo)
     db.session.commit()
     # redirecionando para a página de index
+    # mudando arquivo da imagem
+    arquivo = request.files['arquivo']
+    # caminho da imagem
+    upload_path = app.config['UPLOAD_PATH']
+    timestamp = time.time()
+    # função de deletar arquivo duplicado, do arquivo helpers.py
+    deleta_arquivo(jogo.id)
+    arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
     return redirect(url_for('index'))
 
 # rota para deletar
@@ -83,6 +94,13 @@ def criar():
     # insert 
     db.session.add(novo_jogo)
     db.session.commit()
+    # recebendo informações do campo de imagem
+    arquivo = request.files['arquivo']
+    # caminho da pasta uploads, variável UPLOAD_PATH está no arquivo config.gs
+    upload_path = app.config['UPLOAD_PATH']
+    timestamp = time.time()
+    # upando imagem para a pasta uploads e nomeando arquivo da imagem 
+    arquivo.save(f'{upload_path}/capa{novo_jogo.id}-{timestamp}.jpg')
     
     return redirect(url_for('index'))
     
@@ -137,3 +155,16 @@ def logout():
     # redirecionando 
     # usando url for para procurar a rota. Nesse caso atráves da função
     return redirect(url_for('index'))
+
+
+@app.route('/uploads/<nome_arquivo>')
+def imagem(nome_arquivo):
+    # procurando arquivo capa_padrao.png com o módulo  send_from_directory
+    return send_from_directory('uploads',nome_arquivo)
+    
+# rota para caso o usuário digite um rota inexistente
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('erro.html')
+
+
