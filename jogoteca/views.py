@@ -23,8 +23,47 @@ def novo():
     
     return render_template('novo.html', titulo = 'Novo jogo')
 
+# rota para editar com o parametro id
+@app.route('/editar/<int:id>')
+def editar(id):
+   
+    # se não houver usuário logado na sessão. Senão existir session["usuario_logado"]
+    # se usuario_logado for igual a None
+    if 'usuario_logado' not in session or session["usuario_logado"] == None :
+        # passando a url da página que o usuário tentou acessar
+        return redirect(url_for('login',proxima = url_for('editar')))
+    
+    # select de acordo com o id
+    jogo = Jogos.query.filter_by(id= id).first()
+    
+    return render_template('editar.html', titulo = 'Editando jogo', jogo = jogo)
 
+# rota de atualizar 
+@app.route('/atualizar', methods=['POST',])
+def atualizar():
+    # select pelo id recebido via formulário
+    jogo = Jogos.query.filter_by(id = request.form['id']).first()
+    # atualizando campos
+    jogo.nome = request.form['nome']
+    jogo.categoria = request.form['categoria']
+    jogo.console = request.form['console']
+    db.session.add(jogo)
+    db.session.commit()
+    # redirecionando para a página de index
+    return redirect(url_for('index'))
 
+# rota para deletar
+@app.route('/deletar/<int:id>')
+def deletar(id):
+    if 'usuario_logado' not in session or session["usuario_logado"] == None :
+        return redirect(url_for('login'))
+    # deletando pelo id
+    Jogos.query.filter_by(id = id).delete()
+    db.session.commit()
+    flash('jogo deletado com sucesso')
+    return  redirect(url_for('index'))
+    
+   
 # rota que faz o cadastro e permitindo método post, por padrão o método é get
 @app.route('/criar', methods=['POST',])
 def criar():
