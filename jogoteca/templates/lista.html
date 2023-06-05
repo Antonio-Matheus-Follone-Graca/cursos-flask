@@ -1,7 +1,10 @@
 {% extends 'template.html' %}
 
 {% block conteudo %}
-    <div class="container">
+        <a class="btn btn-primary" href="{{url_for('login')}}"> Login </a>
+        <a class="btn btn-danger" href="{{url_for('logout')}}">Logout </a>
+        <a  class="btn btn-primary" href="{{url_for('novo')}}"> Novo jogo </a>
+  
         <div class="page-header">
             <h1>{{ titulo }}</h1>
         </div>
@@ -29,5 +32,5 @@
                
             </tbody>
         </table>
-    </div>
+   
 {% endblock %}
