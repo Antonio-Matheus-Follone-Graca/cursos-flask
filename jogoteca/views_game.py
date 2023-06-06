@@ -120,46 +120,9 @@ def criar():
     
     return redirect(url_for('index'))
     
-# rota para página de login
-@app.route('/login')
-def login():
-    # pegando a página que o usuário tentou acessar atráves da url, pois caso esteja deslogado e tente acessar o site o mandara para a página de login
-    proxima = request.args.get('proxima')
-    form = FormularioUsuario()
-    return render_template('login.html', proxima = proxima, form = form)     
-# rodando aplicação e ativando debug para a apliacação ficar se atualizando toda hora    
 
-# rota que faz o logar 
 
-@app.route('/autenticar', methods=['POST', ])
-def autenticar():
-    form = FormularioUsuario(request.form)
-    # select de usuarios pelo nick
-    usuario = Usuarios.query.filter_by(nickname = form.nickname.data).first()
-    # se o nick  digitado pelo usuário existe 
-    if usuario:
-        # acessando campo senha 
-        if form.senha.data == usuario.senha:
-            # salvando nickname na session para logar o usuário
-            session['usuario_logado'] = usuario.nickname
-            flash(usuario.nickname + ' logado com sucesso!')
-            proxima_pagina = request.form['proxima']
-            return redirect(proxima_pagina)
-    else:
-        flash('Usuário não logado.')
-        return redirect(url_for('login'))
     
-# rota para deslogar
-@app.route('/logout')
-def logout():
-    # deixando o session vazio o usuário é deslogado
-    session['usuario_logado'] = None
-    flash('Logout efetuado com sucesso!')
-    # redirecionando 
-    # usando url for para procurar a rota. Nesse caso atráves da função
-    return redirect(url_for('index'))
-
-
 @app.route('/uploads/<nome_arquivo>')
 def imagem(nome_arquivo):
     # procurando arquivo capa_padrao.png com o módulo  send_from_directory
